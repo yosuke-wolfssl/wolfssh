@@ -1295,9 +1295,14 @@ static int ssh_worker(thread_ctx_t* threadCtx)
                     break;
                 }
                 #endif
-                /* The channel reads below overwrite cnt_r with a byte
-                 * count, so keep the worker's status. */
+                /* Read ssh->error here, while it is still the worker's. */
                 rc = cnt_r;
+                if (rc == WS_FATAL_ERROR) {
+                    int err = wolfSSH_get_error(ssh);
+
+                    if (err == WS_WANT_READ || err == WS_WANT_WRITE)
+                        rc = err;
+                }
 
                 /* The peer is done sending: hand back the backlog and answer
                  * its EOF, since the library no longer answers for us. Off
@@ -1513,9 +1518,7 @@ static int ssh_worker(thread_ctx_t* threadCtx)
                         wantWrite = 1;
                         continue;
                     }
-                    else if (rc != WS_FATAL_ERROR
-                            || (wolfSSH_get_error(ssh) != WS_WANT_READ
-                                && wolfSSH_get_error(ssh) != WS_WANT_WRITE)) {
+                    else if (rc != WS_WANT_READ) {
                         #ifdef SHELL_DEBUG
                             printf("Break:read sshFd returns %d: errno =%x\n",
                                     cnt_r, errno);
