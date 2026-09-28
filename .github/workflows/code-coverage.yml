@@ -55,10 +55,10 @@ jobs:
         uses: actions/checkout@v6
 
       # clang 18 is the min: -fcoverage-mcdc does not exist before it.
-      - name: Install clang and LLVM coverage tools
+      - name: Install clang, LLVM coverage tools and paramiko
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-18 llvm-18 libclang-rt-18-dev
+          sudo apt-get install -y clang-18 llvm-18 libclang-rt-18-dev python3-paramiko
 
       - name: Download wolfSSL
         uses: actions/download-artifact@v8
